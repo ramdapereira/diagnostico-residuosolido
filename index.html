@@ -224,6 +224,7 @@
             flex-direction: column;
             align-items: center;
             padding-top: 0;
+            transition: transform 0.3s ease;
         }
         .sidebar-title {
             width: 100%;
@@ -309,10 +310,167 @@
             margin-bottom: 2px;
             text-align: center;
         }
+
+        /* Botão para mostrar/ocultar sidebar em mobile */
+        .sidebar-toggle {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            width: 48px;
+            height: 48px;
+            background: #fff;
+            border: 1.5px solid #D3D3D3;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1500;
+            transition: background 0.2s;
+        }
+        .sidebar-toggle:hover {
+            background: #f0f0f0;
+        }
+        .sidebar-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: #333;
+        }
+
+        /* Media queries para responsividade */
+        @media (max-width: 768px) {
+            #map {
+                left: 0;
+                width: 100%;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .sidebar-toggle {
+                display: flex;
+            }
+            
+            .home-btn {
+                left: 74px;
+                top: 18px;
+            }
+            
+            .geolocate-box.geolocate-top-right {
+                top: 18px;
+                right: 18px;
+                left: auto;
+            }
+            
+            .layer-fab {
+                top: 74px;
+                right: 18px;
+            }
+            
+            .layer-card {
+                top: 128px;
+                right: 18px;
+                left: 18px;
+                min-width: auto;
+                width: calc(100% - 36px);
+            }
+            
+            .legend-container {
+                bottom: 18px;
+                right: 18px;
+                left: 18px;
+                width: calc(100% - 36px);
+                max-height: 150px;
+            }
+            
+            /* Botões maiores para touch */
+            .layer-fab, .home-btn, .sidebar-toggle {
+                width: 56px;
+                height: 56px;
+            }
+            
+            .geolocate-box input {
+                width: 140px;
+                font-size: 16px;
+                padding: 8px 12px;
+            }
+            
+            .geolocate-box button {
+                padding: 8px 16px;
+                font-size: 16px;
+            }
+            
+            .basemap-btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+            
+            .layer-checkbox input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .layer-checkbox label {
+                font-size: 14px;
+                margin-left: 10px;
+            }
+            
+            .legend-title {
+                font-size: 16px;
+            }
+            
+            .legend-subtitle {
+                font-size: 14px;
+            }
+            
+            .legend-item {
+                margin-bottom: 8px;
+            }
+            
+            .legend-color {
+                width: 24px;
+                height: 24px;
+                margin-right: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+            }
+            
+            .layer-card {
+                top: 140px;
+            }
+            
+            .geolocate-box.geolocate-top-right {
+                flex-direction: column;
+                gap: 8px;
+                padding: 8px;
+            }
+            
+            .geolocate-box input {
+                width: 120px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <!-- Botão para mostrar/ocultar sidebar em mobile -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="Menu">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+    </button>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-content">
             <div class="sidebar-title">Diagnóstico dos Resíduos<br>Sólidos na Paraíba</div>
             <div class="sidebar-desc">Este WebGIS foi desenvolvido pela SubGerência de Geoprocessamento para apoiar a Gestão dos Resíduos Sólidos no Estado da Paraíba.</div>
@@ -384,6 +542,23 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="script.js"></script>
     <script>
+        // Controle da sidebar em mobile
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+        
+        // Fechar sidebar ao clicar fora (apenas em mobile)
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
         // Controle visual dos basemaps
         function setActiveBasemapBtn(type) {
             document.querySelectorAll('.basemap-btn').forEach(btn => {
@@ -447,12 +622,18 @@
                         }
                     }
                 }
-                if (found) break;
             }
             if (!found) {
-                alert('Município não encontrado nas camadas carregadas!');
+                alert('Município não encontrado!');
             }
         };
+        // Enter para buscar
+        document.getElementById('geolocate-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('geolocate-btn').click();
+            }
+        });
+        
         // Botão de zoom inicial (home)
         document.getElementById('home-btn').innerHTML = `
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
