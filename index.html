@@ -32,7 +32,7 @@
         .layer-fab {
             position: absolute;
             top: 18px;
-            right: 18px;
+            left: 18px;
             width: 48px;
             height: 48px;
             background: #F5F5F5;
@@ -43,7 +43,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 1200;
+            z-index: 2000;
             transition: background 0.2s, box-shadow 0.2s;
         }
         
@@ -150,6 +150,7 @@
             z-index: 1200;
             padding: 4px 8px;
             gap: 4px;
+            margin-left: 70px;
         }
         .geolocate-box input {
             border: 1px solid #ccc;
@@ -225,13 +226,16 @@
             height: 100vh;
             background: #f7f7fa;
             border-right: 2px solid #e0e0e0;
-            z-index: 1400;
+            z-index: 1000;
             box-shadow: 2px 0 8px rgba(0,0,0,0.06);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-top: 0;
             transition: transform 0.3s ease;
+        }
+        .layer-fab, .home-btn, .sidebar-toggle {
+            z-index: 2000;
         }
         .sidebar-title {
             width: 100%;
@@ -267,7 +271,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 2001;
+            z-index: 1200;
             transition: background 0.2s;
             padding: 0;
         }
@@ -382,7 +386,6 @@
             .sidebar {
                 transform: translateX(-100%);
                 width: 280px;
-                transition: transform 0.3s ease-in-out;
             }
             
             .sidebar.active {
@@ -402,11 +405,13 @@
                 top: 18px;
                 right: 18px;
                 left: auto;
+                margin-left: 0;
             }
             
             .layer-fab {
-                top: 74px;
+                left: unset;
                 right: 18px;
+                top: 74px;
             }
             
             .layer-card {
@@ -415,8 +420,6 @@
                 left: 18px;
                 min-width: auto;
                 width: calc(100% - 36px);
-                max-height: 60vh;
-                overflow-y: auto;
             }
             
             .legend-container {
@@ -425,7 +428,6 @@
                 left: 18px;
                 width: calc(100% - 36px);
                 max-height: 150px;
-                overflow-y: auto;
             }
             
             /* Botões maiores para touch */
@@ -477,20 +479,6 @@
                 height: 24px;
                 margin-right: 12px;
             }
-            
-            /* Melhorar espaçamento em mobile */
-            .layer-card h4 {
-                font-size: 16px;
-                margin-bottom: 14px;
-            }
-            
-            .basemap-btn-group {
-                margin-bottom: 12px;
-            }
-            
-            .layer-checkbox {
-                margin-top: 10px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -500,7 +488,6 @@
             
             .layer-card {
                 top: 140px;
-                max-height: 50vh;
             }
             
             .geolocate-box.geolocate-top-right {
@@ -511,21 +498,6 @@
             
             .geolocate-box input {
                 width: 120px;
-            }
-            
-            /* Ajustes para telas muito pequenas */
-            .layer-fab, .home-btn, .sidebar-toggle {
-                width: 52px;
-                height: 52px;
-            }
-            
-            .layer-card {
-                padding: 14px 16px 10px 16px;
-            }
-            
-            .legend-container {
-                max-height: 120px;
-                padding: 10px 14px 8px 14px;
             }
         }
 
@@ -606,73 +578,35 @@
             }
         }
 
-        .top-buttons-mobile {
-            display: none;
-        }
-        @media (max-width: 768px) {
-            .top-buttons-mobile {
-                position: absolute;
-                top: 12px;
-                left: 12px;
-                z-index: 2000;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            }
-            .sidebar-toggle, .home-btn, .layer-fab {
-                position: static !important;
-                margin: 0;
-            }
-            #home-btn, .home-btn {
-                left: unset !important;
-                top: unset !important;
+        @media (min-width: 769px) {
+            .sidebar {
+                width: 140px;
             }
             .layer-fab {
-                right: unset !important;
-                top: unset !important;
+                right: 18px;
+                left: unset;
+                top: 18px;
             }
-            /* Esconde os botões fora do agrupamento no mobile */
-            #home-btn:not(.top-buttons-mobile .home-btn),
-            .layer-fab:not(.top-buttons-mobile .layer-fab),
-            .sidebar-toggle:not(.top-buttons-mobile .sidebar-toggle) {
-                display: none !important;
-            }
-        }
-        @media (min-width: 769px) {
-            .top-buttons-mobile {
-                display: none !important;
-            }
-            /* Garante que os botões individuais apareçam no desktop */
-            #home-btn,
-            .layer-fab,
-            .sidebar-toggle {
-                display: flex !important;
-            }
-        }
-        .leaflet-control {
-            z-index: 2002 !important;
         }
     </style>
 </head>
 <body>
-    <!-- Botões agrupados para mobile -->
-    <div class="top-buttons-mobile">
-        <button class="sidebar-toggle" id="sidebarToggle" title="Menu" aria-label="Abrir menu lateral">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-            </svg>
-        </button>
-        <button id="home-btn" class="home-btn" title="Zoom inicial" aria-label="Voltar ao zoom inicial"></button>
-        <div class="layer-fab" id="layerFab" title="Camadas" role="button" tabindex="0" aria-label="Abrir painel de camadas">
-            <!-- Ícone SVG de camadas -->
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="4" y="4" width="24" height="24" rx="5" fill="#F5F5F5" stroke="#B0B0B0" stroke-width="1.5"/>
-                <g>
-                    <polygon points="16,11 25,15.5 16,20 7,15.5 16,11" fill="#B0B0B0"/>
-                    <polygon points="16,16 25,20.5 16,25 7,20.5 16,16" fill="#B0B0B0" fill-opacity="0.7"/>
-                </g>
-            </svg>
-        </div>
+    <!-- Botão para mostrar/ocultar sidebar em mobile -->
+    <button class="sidebar-toggle" id="sidebarToggle" title="Menu" aria-label="Abrir menu lateral">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+    </button>
+    <button id="home-btn" class="home-btn" title="Zoom inicial" aria-label="Voltar ao zoom inicial"></button>
+    <div class="layer-fab" id="layerFab" title="Camadas" role="button" tabindex="0" aria-label="Abrir painel de camadas">
+        <!-- Ícone SVG de camadas -->
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="4" y="4" width="24" height="24" rx="5" fill="#F5F5F5" stroke="#B0B0B0" stroke-width="1.5"/>
+            <g>
+                <polygon points="16,11 25,15.5 16,20 7,15.5 16,11" fill="#B0B0B0"/>
+                <polygon points="16,16 25,20.5 16,25 7,20.5 16,16" fill="#B0B0B0" fill-opacity="0.7"/>
+            </g>
+        </svg>
     </div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-content">
