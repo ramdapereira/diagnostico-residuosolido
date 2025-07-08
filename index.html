@@ -605,6 +605,50 @@
                 font-size: 14px;
             }
         }
+
+        .top-buttons-mobile {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .top-buttons-mobile {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                z-index: 2000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .sidebar-toggle, .home-btn, .layer-fab {
+                position: static !important;
+                margin: 0;
+            }
+            #home-btn, .home-btn {
+                left: unset !important;
+                top: unset !important;
+            }
+            .layer-fab {
+                right: unset !important;
+                top: unset !important;
+            }
+            /* Esconde os botões fora do agrupamento no mobile */
+            #home-btn:not(.top-buttons-mobile .home-btn),
+            .layer-fab:not(.top-buttons-mobile .layer-fab),
+            .sidebar-toggle:not(.top-buttons-mobile .sidebar-toggle) {
+                display: none !important;
+            }
+        }
+        @media (min-width: 769px) {
+            .top-buttons-mobile {
+                display: none !important;
+            }
+            /* Garante que os botões individuais apareçam no desktop */
+            #home-btn,
+            .layer-fab,
+            .sidebar-toggle {
+                display: flex !important;
+            }
+        }
     </style>
 </head>
 <body>
