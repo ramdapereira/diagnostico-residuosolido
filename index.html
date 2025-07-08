@@ -608,13 +608,25 @@
     </style>
 </head>
 <body>
-    <!-- Botão para mostrar/ocultar sidebar em mobile -->
-    <button class="sidebar-toggle" id="sidebarToggle" title="Menu" aria-label="Abrir menu lateral">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-        </svg>
-    </button>
-
+    <!-- Botões agrupados para mobile -->
+    <div class="top-buttons-mobile">
+        <button class="sidebar-toggle" id="sidebarToggle" title="Menu" aria-label="Abrir menu lateral">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+        </button>
+        <button id="home-btn" class="home-btn" title="Zoom inicial" aria-label="Voltar ao zoom inicial"></button>
+        <div class="layer-fab" id="layerFab" title="Camadas" role="button" tabindex="0" aria-label="Abrir painel de camadas">
+            <!-- Ícone SVG de camadas -->
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="4" y="4" width="24" height="24" rx="5" fill="#F5F5F5" stroke="#B0B0B0" stroke-width="1.5"/>
+                <g>
+                    <polygon points="16,11 25,15.5 16,20 7,15.5 16,11" fill="#B0B0B0"/>
+                    <polygon points="16,16 25,20.5 16,25 7,20.5 16,16" fill="#B0B0B0" fill-opacity="0.7"/>
+                </g>
+            </svg>
+        </div>
+    </div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-content">
             <div class="sidebar-title">Diagnóstico dos Resíduos<br>Sólidos na Paraíba</div>
@@ -640,16 +652,6 @@
     </div>
     <button id="home-btn" class="home-btn" title="Zoom inicial" aria-label="Voltar ao zoom inicial"></button>
     <div id="legend-container" class="legend-container"></div>
-    <div class="layer-fab" id="layerFab" title="Camadas" role="button" tabindex="0" aria-label="Abrir painel de camadas">
-        <!-- Ícone SVG de camadas -->
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="4" y="4" width="24" height="24" rx="5" fill="#F5F5F5" stroke="#B0B0B0" stroke-width="1.5"/>
-            <g>
-                <polygon points="16,11 25,15.5 16,20 7,15.5 16,11" fill="#B0B0B0"/>
-                <polygon points="16,16 25,20.5 16,25 7,20.5 16,16" fill="#B0B0B0" fill-opacity="0.7"/>
-            </g>
-        </svg>
-    </div>
     <div class="layer-card" id="layerCard">
         <h4>Camadas</h4>
         <div class="basemap-btn-group">
