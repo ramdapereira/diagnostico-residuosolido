@@ -597,7 +597,6 @@
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
         </svg>
     </button>
-    <button id="home-btn" class="home-btn" title="Zoom inicial" aria-label="Voltar ao zoom inicial"></button>
     <div class="layer-fab" id="layerFab" title="Camadas" role="button" tabindex="0" aria-label="Abrir painel de camadas">
         <!-- Ícone SVG de camadas -->
         <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -773,18 +772,6 @@
                 document.getElementById('geolocate-btn').click();
             }
         });
-        
-        // Botão de zoom inicial (home)
-        document.getElementById('home-btn').innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 11.5L12 5L21 11.5" stroke="#228B22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M5 10.5V19C5 19.5523 5.44772 20 6 20H18C18.5523 20 19 19.5523 19 19V10.5" stroke="#228B22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <rect x="9" y="14" width="6" height="6" rx="1" fill="#228B22"/>
-            </svg>
-        `;
-        document.getElementById('home-btn').onclick = function() {
-            map.setView([-7.2399, -36.7819], 8);
-        };
     </script>
 </body>
 </html> 
