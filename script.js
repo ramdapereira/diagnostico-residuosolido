@@ -7,6 +7,7 @@ let destinacaoLayer = null;
 let ettLayer = null;
 let pradsLayer = null;
 let ugirsuLayer = null;
+let cooperativasLayer = null;
 
 // Definição dos 3 basemaps
 const basemaps = {
@@ -43,6 +44,7 @@ function initMap() {
     loadETTGeoJSON();
     loadPRADSGeoJSON();
     loadUGIRSUGeoJSON();
+    loadCooperativasGeoJSON();
     
     // Configurar eventos dos basemaps
     setupSimpleBasemapControls();
@@ -300,6 +302,38 @@ function loadUGIRSUGeoJSON() {
         });
 }
 
+// Função para carregar cooperativas.geojson
+function loadCooperativasGeoJSON() {
+    fetch('dados/cooperativas.geojson')
+        .then(response => response.json())
+        .then(data => {
+            cooperativasLayer = L.geoJSON(data, {
+                pointToLayer: function(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 3,
+                        fillColor: '#FFFF00',
+                        color: '#E6E600',
+                        weight: 1.5,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    });
+                },
+                onEachFeature: function(feature, layer) {
+                    let popup = '';
+                    if (feature.properties) {
+                        if (feature.properties.Município) {
+                            popup += `<strong>Município:</strong> ${feature.properties.Município}`;
+                        }
+                    }
+                    layer.bindPopup(popup);
+                }
+            });
+        })
+        .catch(err => {
+            console.error('Erro ao carregar cooperativas.geojson:', err);
+        });
+}
+
 // Função para marcar o botão ativo no menu
 function setActiveBasemapBtn(basemapType) {
     document.querySelectorAll('.basemap-btn').forEach(btn => {
@@ -357,6 +391,9 @@ function showLegend(type) {
     } else if (type === 'ugirsu') {
         html += '<div class="legend-subtitle">Municípios com UGIRSU</div>';
         html += `<div class='legend-item'><span class='legend-color' style='background:#AFEEEE;'></span>UGIRSU</div>`;
+    } else if (type === 'cooperativas') {
+        html += '<div class="legend-subtitle">Cooperativas de Catadores</div>';
+        html += `<div class='legend-item'><span class='legend-color' style='background:#FFFF00;'></span>Cooperativa</div>`;
     }
     legend.innerHTML = html;
     legend.style.display = 'block';
@@ -377,6 +414,7 @@ function setupLayerToggles() {
     const ettToggle = document.getElementById('toggle-ett');
     const pradsToggle = document.getElementById('toggle-prads');
     const ugirsuToggle = document.getElementById('toggle-ugirsu');
+    const cooperativasToggle = document.getElementById('toggle-cooperativas');
     pbToggle.addEventListener('change', function() {
         if (pbLayer) {
             if (pbToggle.checked) {
@@ -443,6 +481,17 @@ function setupLayerToggles() {
             }
         }
     });
+    cooperativasToggle.addEventListener('change', function() {
+        if (cooperativasLayer) {
+            if (cooperativasToggle.checked) {
+                map.addLayer(cooperativasLayer);
+                showLegend('cooperativas');
+            } else {
+                map.removeLayer(cooperativasLayer);
+                hideLegend();
+            }
+        }
+    });
     // Exibir legenda da Paraíba ao iniciar
     if (pbToggle.checked) showLegend('pb');
 }
@@ -451,9 +500,68 @@ function setupLayerToggles() {
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
     
+    // Adicionar funcionalidades responsivas
+    setupResponsiveFeatures();
+    
     console.log('WebGIS inicializado com 3 camadas de basemaps e camada pb.geojson!');
     console.log('Basemaps disponíveis:');
     console.log('- OpenStreetMap (padrão)');
     console.log('- Imagem de Satélite (Esri)');
     console.log('- Mapa Topográfico (OpenTopoMap)');
-}); 
+});
+
+// Função para configurar funcionalidades responsivas
+function setupResponsiveFeatures() {
+    // Fechar sidebar ao redimensionar para desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    });
+    
+    // Melhorar experiência de touch em mobile
+    if ('ontouchstart' in window) {
+        // Aumentar área de toque para elementos interativos
+        const touchElements = document.querySelectorAll('.layer-fab, .home-btn, .sidebar-toggle, .basemap-btn');
+        touchElements.forEach(element => {
+            element.style.minHeight = '44px';
+            element.style.minWidth = '44px';
+        });
+        
+        // Adicionar feedback visual para toque
+        touchElements.forEach(element => {
+            element.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            
+            element.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    }
+    
+    // Melhorar acessibilidade
+    document.addEventListener('keydown', function(e) {
+        // ESC para fechar sidebar em mobile
+        if (e.key === 'Escape' && window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('active');
+        }
+        
+        // Enter para buscar no campo de geolocalização
+        if (e.key === 'Enter' && document.activeElement.id === 'geolocate-input') {
+            document.getElementById('geolocate-btn').click();
+        }
+    });
+    
+    // Melhorar performance em dispositivos móveis
+    if (window.innerWidth <= 768) {
+        // Reduzir animações em mobile para melhor performance
+        document.body.style.setProperty('--transition-duration', '0.2s');
+        
+        // Otimizar para touch
+        const map = document.getElementById('map');
+        if (map) {
+            map.style.touchAction = 'manipulation';
+        }
+    }
+} 

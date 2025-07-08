@@ -14,6 +14,9 @@
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             box-sizing: border-box;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
         #map {
@@ -47,6 +50,10 @@
         .layer-fab:hover {
             background: #ececec;
             box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+        }
+        
+        .layer-fab:active {
+            transform: scale(0.98);
         }
         
         .layer-card {
@@ -267,6 +274,10 @@
         .home-btn:hover {
             background: #f0f0f0;
         }
+        
+        .home-btn:active {
+            transform: scale(0.98);
+        }
         .home-btn svg {
             width: 22px;
             height: 22px;
@@ -339,6 +350,29 @@
         }
 
         /* Media queries para responsividade */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .sidebar-title {
+                font-size: 0.9rem;
+                padding: 14px 4px 10px 4px;
+            }
+            
+            .sidebar-desc {
+                font-size: 0.65rem;
+                margin: 16px 12px 0 12px;
+                padding: 8px 12px;
+            }
+            
+            .sidebar-info {
+                margin: 14px 12px 0 12px;
+                font-size: 0.65rem;
+                padding: 8px 12px 6px 12px;
+            }
+        }
+
         @media (max-width: 768px) {
             #map {
                 left: 0;
@@ -348,6 +382,7 @@
             .sidebar {
                 transform: translateX(-100%);
                 width: 280px;
+                transition: transform 0.3s ease-in-out;
             }
             
             .sidebar.active {
@@ -380,6 +415,8 @@
                 left: 18px;
                 min-width: auto;
                 width: calc(100% - 36px);
+                max-height: 60vh;
+                overflow-y: auto;
             }
             
             .legend-container {
@@ -388,6 +425,7 @@
                 left: 18px;
                 width: calc(100% - 36px);
                 max-height: 150px;
+                overflow-y: auto;
             }
             
             /* Botões maiores para touch */
@@ -439,6 +477,20 @@
                 height: 24px;
                 margin-right: 12px;
             }
+            
+            /* Melhorar espaçamento em mobile */
+            .layer-card h4 {
+                font-size: 16px;
+                margin-bottom: 14px;
+            }
+            
+            .basemap-btn-group {
+                margin-bottom: 12px;
+            }
+            
+            .layer-checkbox {
+                margin-top: 10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -448,6 +500,7 @@
             
             .layer-card {
                 top: 140px;
+                max-height: 50vh;
             }
             
             .geolocate-box.geolocate-top-right {
@@ -459,13 +512,105 @@
             .geolocate-box input {
                 width: 120px;
             }
+            
+            /* Ajustes para telas muito pequenas */
+            .layer-fab, .home-btn, .sidebar-toggle {
+                width: 52px;
+                height: 52px;
+            }
+            
+            .layer-card {
+                padding: 14px 16px 10px 16px;
+            }
+            
+            .legend-container {
+                max-height: 120px;
+                padding: 10px 14px 8px 14px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .sidebar-title {
+                font-size: 0.85rem;
+                padding: 12px 4px 8px 4px;
+            }
+            
+            .sidebar-desc {
+                font-size: 0.6rem;
+                margin: 12px 8px 0 8px;
+                padding: 6px 10px;
+            }
+            
+            .sidebar-info {
+                margin: 12px 8px 0 8px;
+                font-size: 0.6rem;
+                padding: 6px 10px 4px 10px;
+            }
+            
+            .layer-fab, .home-btn, .sidebar-toggle {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .geolocate-box input {
+                width: 100px;
+                font-size: 14px;
+            }
+            
+            .geolocate-box button {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+        }
+
+        /* Melhorias para desktop */
+        @media (min-width: 1200px) {
+            .sidebar {
+                width: 260px;
+            }
+            
+            .sidebar-title {
+                font-size: 1.1rem;
+                padding: 18px 8px 14px 8px;
+            }
+            
+            .sidebar-desc {
+                font-size: 0.75rem;
+                margin: 20px 18px 0 18px;
+                padding: 12px 16px;
+            }
+            
+            .sidebar-info {
+                margin: 18px 18px 0 18px;
+                font-size: 0.75rem;
+                padding: 12px 16px 10px 16px;
+            }
+            
+            .layer-card {
+                min-width: 200px;
+                padding: 18px 20px 14px 20px;
+            }
+            
+            .layer-card h4 {
+                font-size: 16px;
+                margin-bottom: 14px;
+            }
+            
+            .basemap-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            
+            .layer-checkbox label {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Botão para mostrar/ocultar sidebar em mobile -->
-    <button class="sidebar-toggle" id="sidebarToggle" title="Menu">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <button class="sidebar-toggle" id="sidebarToggle" title="Menu" aria-label="Abrir menu lateral">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
         </svg>
     </button>
@@ -493,11 +638,11 @@
         <input type="text" id="geolocate-input" placeholder="Lat,Lon ou município" />
         <button id="geolocate-btn">Ir</button>
     </div>
-    <button id="home-btn" class="home-btn" title="Zoom inicial"></button>
+    <button id="home-btn" class="home-btn" title="Zoom inicial" aria-label="Voltar ao zoom inicial"></button>
     <div id="legend-container" class="legend-container"></div>
-    <div class="layer-fab" id="layerFab" title="Camadas">
+    <div class="layer-fab" id="layerFab" title="Camadas" role="button" tabindex="0" aria-label="Abrir painel de camadas">
         <!-- Ícone SVG de camadas -->
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <rect x="4" y="4" width="24" height="24" rx="5" fill="#F5F5F5" stroke="#B0B0B0" stroke-width="1.5"/>
             <g>
                 <polygon points="16,11 25,15.5 16,20 7,15.5 16,11" fill="#B0B0B0"/>
@@ -535,6 +680,10 @@
         <div class="layer-checkbox">
             <input type="checkbox" id="toggle-ugirsu">
             <label for="toggle-ugirsu">Municípios com UGIRSU</label>
+        </div>
+        <div class="layer-checkbox">
+            <input type="checkbox" id="toggle-cooperativas">
+            <label for="toggle-cooperativas">Cooperativas de Catadores</label>
         </div>
     </div>
 
@@ -578,8 +727,17 @@
         // Mostrar/ocultar o cartão de camadas
         const fab = document.getElementById('layerFab');
         const card = document.getElementById('layerCard');
-        fab.onclick = function() {
+        
+        function toggleLayerCard() {
             card.classList.toggle('active');
+        }
+        
+        fab.onclick = toggleLayerCard;
+        fab.onkeydown = function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleLayerCard();
+            }
         };
         // Fechar ao clicar fora
         document.addEventListener('click', function(e) {
@@ -604,7 +762,7 @@
                 return;
             }
             // Busca por nome de município (em todas as camadas carregadas)
-            const layers = [pbLayer, aterroLayer, destinacaoLayer, ettLayer, pradsLayer, ugirsuLayer];
+            const layers = [pbLayer, aterroLayer, destinacaoLayer, ettLayer, pradsLayer, ugirsuLayer, cooperativasLayer];
             let found = false;
             for (const lyr of layers) {
                 if (lyr && lyr.getLayers) {
