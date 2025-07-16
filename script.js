@@ -219,10 +219,97 @@ function loadDestinacaoGeoJSON() {
                     }
                     layer.bindPopup(popup);
                 }
-            }); // Não adiciona ao mapa aqui
+            });
             window.destCategorias = valoresUnicos;
             window.destCores = corPorValor;
             window.destCount = countPorDestinacao;
+            window.destData = data;
+
+            // Popular o filtro de categorias
+            const filtro = document.getElementById('filtro-destinacao');
+            if (filtro) {
+                // Limpa opções antigas (exceto 'Todos')
+                filtro.innerHTML = '<option value="todos">Todos</option>';
+                valoresUnicos.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    filtro.appendChild(opt);
+                });
+            }
+
+            // Camada base (todas as feições)
+            window.destinacaoLayerFull = L.geoJSON(data, {
+                style: function(feature) {
+                    const valor = feature.properties && feature.properties.DESTINACAO;
+                    let style = {
+                        color: '#4F4F4F',
+                        weight: 1,
+                        fillColor: corPorValor[valor] || '#bdbdbd',
+                        fillOpacity: 0.85
+                    };
+                    if (valor === 'A S de Guarabira') {
+                        style.color = '#FF4500';
+                        style.weight = 2;
+                        style.fillOpacity = 0.9;
+                    } else if (valor === 'A S Coremas') {
+                        style.color = '#8A2BE2';
+                        style.weight = 2;
+                        style.fillOpacity = 0.9;
+                    }
+                    return style;
+                },
+                onEachFeature: function(feature, layer) {
+                    let popup = '';
+                    if (feature.properties) {
+                        if (feature.properties.NM_MUN) {
+                            popup += `<strong>NM_MUN:</strong> ${feature.properties.NM_MUN}<br/>`;
+                        }
+                        if (feature.properties.DESTINACAO) {
+                            popup += `<strong>DESTINACAO:</strong> ${feature.properties.DESTINACAO}`;
+                        }
+                    }
+                    layer.bindPopup(popup);
+                }
+            });
+            // Camadas filtradas por categoria
+            window.destinacaoLayersByCat = {};
+            valoresUnicos.forEach(cat => {
+                const features = data.features.filter(f => f.properties.DESTINACAO === cat);
+                window.destinacaoLayersByCat[cat] = L.geoJSON({type: 'FeatureCollection', features}, {
+                    style: function(feature) {
+                        const valor = feature.properties && feature.properties.DESTINACAO;
+                        let style = {
+                            color: '#4F4F4F',
+                            weight: 1,
+                            fillColor: corPorValor[valor] || '#bdbdbd',
+                            fillOpacity: 0.85
+                        };
+                        if (valor === 'A S de Guarabira') {
+                            style.color = '#FF4500';
+                            style.weight = 2;
+                            style.fillOpacity = 0.9;
+                        } else if (valor === 'A S Coremas') {
+                            style.color = '#8A2BE2';
+                            style.weight = 2;
+                            style.fillOpacity = 0.9;
+                        }
+                        return style;
+                    },
+                    onEachFeature: function(feature, layer) {
+                        let popup = '';
+                        if (feature.properties) {
+                            if (feature.properties.NM_MUN) {
+                                popup += `<strong>NM_MUN:</strong> ${feature.properties.NM_MUN}<br/>`;
+                            }
+                            if (feature.properties.DESTINACAO) {
+                                popup += `<strong>DESTINACAO:</strong> ${feature.properties.DESTINACAO}`;
+                            }
+                        }
+                        layer.bindPopup(popup);
+                    }
+                });
+            });
         })
         .catch(err => {
             console.error('Erro ao carregar municipios-destinacao.geojson:', err);
@@ -402,7 +489,7 @@ function showLegend(type) {
         if (window.pbRegionais && window.pbRegionais.length) {
             for (const reg of window.pbRegionais) {
                 const count = window.pbRegionaisCount && window.pbRegionaisCount[reg] ? window.pbRegionaisCount[reg] : 0;
-                html += `<div class='legend-item'><span class='legend-color' style='background:${window.pbRegionaisCores[reg]};'></span>${reg} <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
+                html += `<div class='legend-item'><span class='legend-color' style='background:${window.pbRegionaisCores[reg]};'></span><span class='legend-label'>${reg}</span><span class='legend-count'>( ${count} )</span></div>`;
             }
         }
     } else if (type === 'destinacao') {
@@ -410,7 +497,7 @@ function showLegend(type) {
         if (window.destCategorias && window.destCategorias.length) {
             for (const cat of window.destCategorias) {
                 const count = window.destCount && window.destCount[cat] ? window.destCount[cat] : 0;
-                html += `<div class='legend-item'><span class='legend-color' style='background:${window.destCores[cat]};'></span>${cat} <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
+                html += `<div class='legend-item'><span class='legend-color' style='background:${window.destCores[cat]};'></span><span class='legend-label'>${cat}</span><span class='legend-count'>( ${count} )</span></div>`;
             }
         }
     } else if (type === 'aterro') {
@@ -477,14 +564,18 @@ function setupLayerToggles() {
         }
     });
     destinacaoToggle.addEventListener('change', function() {
-        if (destinacaoLayer) {
-            if (destinacaoToggle.checked) {
-                map.addLayer(destinacaoLayer);
-                showLegend('destinacao');
-            } else {
-                map.removeLayer(destinacaoLayer);
-                hideLegend();
-            }
+        // Sempre remover todas as camadas ao ativar/desativar
+        if (window.destinacaoLayerFull) map.removeLayer(window.destinacaoLayerFull);
+        if (window.destinacaoLayersByCat) {
+            Object.values(window.destinacaoLayersByCat).forEach(l => map.removeLayer(l));
+        }
+        if (destinacaoToggle.checked) {
+            filtro.disabled = false;
+            // Não adiciona nenhuma camada automaticamente
+            hideLegend();
+        } else {
+            filtro.disabled = true;
+            hideLegend();
         }
     });
     ettToggle.addEventListener('change', function() {
@@ -535,6 +626,188 @@ function setupLayerToggles() {
     if (pbToggle.checked) showLegend('pb');
 }
 
+// Atualizar exibição da camada de destinação conforme filtro
+function setupFiltroDestinacao() {
+    const filtro = document.getElementById('filtro-destinacao');
+    const destinacaoToggle = document.getElementById('toggle-destinacao');
+    if (!filtro || !destinacaoToggle) return;
+    filtro.addEventListener('change', function() {
+        if (!destinacaoToggle.checked) return;
+        // Remove todas as camadas SEMPRE antes de adicionar a correta
+        if (window.destinacaoLayerFull) map.removeLayer(window.destinacaoLayerFull);
+        if (window.destinacaoLayersByCat) {
+            Object.values(window.destinacaoLayersByCat).forEach(l => map.removeLayer(l));
+        }
+        // Adiciona apenas a camada selecionada
+        if (filtro.value === 'todos') {
+            if (window.destinacaoLayerFull) map.addLayer(window.destinacaoLayerFull);
+            showLegend('destinacao');
+        } else if (filtro.value && window.destinacaoLayersByCat && window.destinacaoLayersByCat[filtro.value]) {
+            map.addLayer(window.destinacaoLayersByCat[filtro.value]);
+            showLegend('destinacao');
+        }
+    });
+    destinacaoToggle.addEventListener('change', function() {
+        // Sempre remover todas as camadas ao ativar/desativar
+        if (window.destinacaoLayerFull) map.removeLayer(window.destinacaoLayerFull);
+        if (window.destinacaoLayersByCat) {
+            Object.values(window.destinacaoLayersByCat).forEach(l => map.removeLayer(l));
+        }
+        if (destinacaoToggle.checked) {
+            filtro.disabled = false;
+            // Não adiciona nenhuma camada automaticamente
+            hideLegend();
+        } else {
+            filtro.disabled = true;
+            hideLegend();
+        }
+    });
+    // Inicialmente, se a camada estiver ativa, mostrar tudo
+    if (destinacaoToggle.checked) {
+        filtro.disabled = false;
+        filtro.value = 'todos';
+        filtro.dispatchEvent(new Event('change'));
+    } else {
+        filtro.disabled = true;
+    }
+}
+
+// Função utilitária para obter camadas ativas
+function getCamadasAtivas() {
+    const camadas = [];
+    if (document.getElementById('toggle-pb').checked) camadas.push('Paraíba');
+    if (document.getElementById('toggle-aterro').checked) camadas.push('Municípios com Aterro Sanitário');
+    if (document.getElementById('toggle-destinacao').checked) camadas.push('Destinação dos Resíduos Sólidos');
+    if (document.getElementById('toggle-ett').checked) camadas.push('Municípios com ETT');
+    if (document.getElementById('toggle-prads').checked) camadas.push('Municípios com PRADS');
+    if (document.getElementById('toggle-ugirsu').checked) camadas.push('Municípios com UGIRSU');
+    if (document.getElementById('toggle-cooperativas').checked) camadas.push('Iniciativas de Coleta Seletiva');
+    return camadas;
+}
+
+// Função utilitária para obter filtro de destinação
+function getFiltroDestinacao() {
+    const filtro = document.getElementById('filtro-destinacao');
+    if (filtro && filtro.value && filtro.value !== 'todos') return filtro.value;
+    return 'Todos';
+}
+
+// Função utilitária para obter legenda visível
+function getLegendaHTML() {
+    const legend = document.getElementById('legend-container');
+    return legend && legend.style.display !== 'none' ? legend.innerHTML : '';
+}
+
+// Função utilitária para obter lista de feições filtradas (destinação)
+function getFeicoesFiltradas() {
+    const filtro = document.getElementById('filtro-destinacao');
+    if (!filtro || !window.destData) return [];
+    if (filtro.value === 'todos') return [];
+    return window.destData.features.filter(f => f.properties && f.properties.DESTINACAO === filtro.value);
+}
+
+// Função para gerar o relatório em PDF
+function gerarRelatorioPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    let y = 12;
+    // Título
+    doc.setFontSize(18);
+    doc.text('Relatório WebGIS - Diagnóstico dos Resíduos Sólidos na Paraíba', 12, y);
+    y += 10;
+    // Data/hora
+    doc.setFontSize(11);
+    doc.text('Data/Hora: ' + new Date().toLocaleString('pt-BR'), 12, y);
+    y += 8;
+    // Camadas ativas
+    doc.setFontSize(13);
+    doc.text('Camadas Ativas:', 12, y);
+    y += 7;
+    doc.setFontSize(11);
+    getCamadasAtivas().forEach(camada => {
+        doc.text('- ' + camada, 16, y);
+        y += 6;
+    });
+    y += 2;
+    // Filtro de destinação
+    if (document.getElementById('toggle-destinacao').checked) {
+        doc.setFontSize(13);
+        doc.text('Filtro de Destinação:', 12, y);
+        y += 7;
+        doc.setFontSize(11);
+        doc.text('Selecionado: ' + getFiltroDestinacao(), 16, y);
+        y += 8;
+    }
+    // Legenda
+    const legendaHTML = getLegendaHTML();
+    if (legendaHTML) {
+        doc.setFontSize(13);
+        doc.text('Legenda:', 12, y);
+        y += 7;
+        // Renderizar legenda com simbologia
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = legendaHTML;
+        const items = tempDiv.querySelectorAll('.legend-item');
+        items.forEach(item => {
+            const colorEl = item.querySelector('.legend-color');
+            const labelEl = item.querySelector('.legend-label');
+            const countEl = item.querySelector('.legend-count');
+            // Cor
+            let color = '#bdbdbd';
+            if (colorEl) {
+                const style = colorEl.getAttribute('style');
+                const match = style && style.match(/background:([^;]+)/);
+                if (match) color = match[1].trim();
+            }
+            // Desenhar quadradinho
+            doc.setFillColor(color);
+            doc.rect(16, y - 4, 5, 5, 'F');
+            // Texto
+            doc.setFontSize(11);
+            let txt = labelEl ? labelEl.textContent.trim() : item.textContent.trim();
+            let count = countEl ? countEl.textContent.trim() : '';
+            doc.text(txt, 23, y);
+            if (count) doc.text(count, 23 + doc.getTextWidth(txt) + 2, y);
+            y += 6;
+        });
+        y += 2;
+    }
+    // Lista de feições filtradas (opcional)
+    const feicoes = getFeicoesFiltradas();
+    if (feicoes.length > 0) {
+        doc.setFontSize(13);
+        doc.text('Municípios filtrados:', 12, y);
+        y += 7;
+        doc.setFontSize(10);
+        feicoes.forEach(f => {
+            const nome = f.properties && f.properties.NM_MUN ? f.properties.NM_MUN : '-';
+            doc.text('- ' + nome, 16, y);
+            y += 5;
+            if (y > 270) { doc.addPage(); y = 12; }
+        });
+        y += 2;
+    }
+    // Captura do mapa
+    doc.setFontSize(13);
+    doc.text('Imagem do Mapa:', 12, y);
+    y += 5;
+    html2canvas(document.getElementById('map')).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pageWidth = doc.internal.pageSize.getWidth() - 24;
+        const imgProps = doc.getImageProperties(imgData);
+        const imgHeight = (imgProps.height * pageWidth) / imgProps.width;
+        // Centralizar a imagem
+        const x = 12 + (pageWidth - (imgProps.width * (pageWidth / imgProps.width))) / 2;
+        doc.addImage(imgData, 'PNG', x, y, pageWidth, imgHeight > 120 ? 120 : imgHeight);
+        doc.save('relatorio-webgis.pdf');
+    });
+}
+
+// Evento do botão
+if (document.getElementById('btn-relatorio')) {
+    document.getElementById('btn-relatorio').onclick = gerarRelatorioPDF;
+}
+
 // Inicializar o mapa quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
@@ -544,4 +817,5 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('- OpenStreetMap (padrão)');
     console.log('- Imagem de Satélite (Esri)');
     console.log('- Mapa Topográfico (OpenTopoMap)');
+    setupFiltroDestinacao();
 }); 
