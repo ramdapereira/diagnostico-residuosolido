@@ -724,68 +724,200 @@ function gerarRelatorioPDF() {
     doc.text('Camadas Ativas:', 12, y);
     y += 7;
     doc.setFontSize(11);
-    getCamadasAtivas().forEach(camada => {
+    const camadas = getCamadasAtivas();
+    camadas.forEach(camada => {
         doc.text('- ' + camada, 16, y);
         y += 6;
     });
     y += 2;
-    // Filtro de destinação
-    if (document.getElementById('toggle-destinacao').checked) {
+
+    // Para cada camada ativa, exibir legenda e lista de feições
+    for (const camada of camadas) {
         doc.setFontSize(13);
-        doc.text('Filtro de Destinação:', 12, y);
+        doc.text(camada + ':', 12, y);
         y += 7;
         doc.setFontSize(11);
-        doc.text('Selecionado: ' + getFiltroDestinacao(), 16, y);
-        y += 8;
-    }
-    // Legenda
-    const legendaHTML = getLegendaHTML();
-    if (legendaHTML) {
-        doc.setFontSize(13);
-        doc.text('Legenda:', 12, y);
-        y += 7;
-        // Renderizar legenda com simbologia
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = legendaHTML;
-        const items = tempDiv.querySelectorAll('.legend-item');
-        items.forEach(item => {
-            const colorEl = item.querySelector('.legend-color');
-            const labelEl = item.querySelector('.legend-label');
-            const countEl = item.querySelector('.legend-count');
-            // Cor
-            let color = '#bdbdbd';
-            if (colorEl) {
-                const style = colorEl.getAttribute('style');
-                const match = style && style.match(/background:([^;]+)/);
-                if (match) color = match[1].trim();
-            }
-            // Desenhar quadradinho
-            doc.setFillColor(color);
-            doc.rect(16, y - 4, 5, 5, 'F');
-            // Texto
-            doc.setFontSize(11);
-            let txt = labelEl ? labelEl.textContent.trim() : item.textContent.trim();
-            let count = countEl ? countEl.textContent.trim() : '';
-            doc.text(txt, 23, y);
-            if (count) doc.text(count, 23 + doc.getTextWidth(txt) + 2, y);
+        // Legenda e lista de feições
+        if (camada === 'Paraíba' && window.pbRegionais && window.pbRegionaisCores && pbLayer) {
+            // Legenda
+            doc.text('Legenda:', 16, y);
             y += 6;
-        });
-        y += 2;
-    }
-    // Lista de feições filtradas (opcional)
-    const feicoes = getFeicoesFiltradas();
-    if (feicoes.length > 0) {
-        doc.setFontSize(13);
-        doc.text('Municípios filtrados:', 12, y);
-        y += 7;
-        doc.setFontSize(10);
-        feicoes.forEach(f => {
-            const nome = f.properties && f.properties.NM_MUN ? f.properties.NM_MUN : '-';
-            doc.text('- ' + nome, 16, y);
-            y += 5;
-            if (y > 270) { doc.addPage(); y = 12; }
-        });
-        y += 2;
+            window.pbRegionais.forEach(reg => {
+                const color = window.pbRegionaisCores[reg] || '#bdbdbd';
+                const count = window.pbRegionaisCount && window.pbRegionaisCount[reg] ? window.pbRegionaisCount[reg] : 0;
+                doc.setFillColor(color);
+                doc.rect(20, y - 4, 5, 5, 'F');
+                doc.text(reg, 27, y);
+                doc.text(`( ${count} )`, 27 + doc.getTextWidth(reg) + 2, y);
+                y += 6;
+            });
+            y += 2;
+            // Lista de municípios
+            if (pbLayer && pbLayer.getLayers) {
+                doc.setFontSize(11);
+                doc.text('Municípios:', 16, y);
+                y += 6;
+                pbLayer.getLayers().forEach(l => {
+                    const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
+                    doc.text('- ' + nome, 20, y);
+                    y += 5;
+                    if (y > 270) { doc.addPage(); y = 12; }
+                });
+                y += 2;
+            }
+        } else if (camada === 'Municípios com UGIRSU' && ugirsuLayer) {
+            // Legenda
+            doc.text('Legenda:', 16, y);
+            y += 6;
+            doc.setFillColor('#AFEEEE');
+            doc.rect(20, y - 4, 5, 5, 'F');
+            doc.text('UGIRSU', 27, y);
+            doc.text(`( ${window.ugirsuCount || 0} )`, 27 + doc.getTextWidth('UGIRSU') + 2, y);
+            y += 6;
+            y += 2;
+            // Lista de municípios
+            if (ugirsuLayer.getLayers) {
+                doc.setFontSize(11);
+                doc.text('Municípios:', 16, y);
+                y += 6;
+                ugirsuLayer.getLayers().forEach(l => {
+                    const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
+                    doc.text('- ' + nome, 20, y);
+                    y += 5;
+                    if (y > 270) { doc.addPage(); y = 12; }
+                });
+                y += 2;
+            }
+        } else if (camada === 'Iniciativas de Coleta Seletiva' && cooperativasLayer) {
+            // Legenda
+            doc.text('Legenda:', 16, y);
+            y += 6;
+            doc.setFillColor('#FFFF00');
+            doc.rect(20, y - 4, 5, 5, 'F');
+            doc.text('Iniciativas', 27, y);
+            doc.text(`( ${window.cooperativasCount || 0} )`, 27 + doc.getTextWidth('Iniciativas') + 2, y);
+            y += 6;
+            y += 2;
+            // Lista de municípios
+            if (cooperativasLayer.getLayers) {
+                doc.setFontSize(11);
+                doc.text('Municípios:', 16, y);
+                y += 6;
+                cooperativasLayer.getLayers().forEach(l => {
+                    const nome = l.feature && l.feature.properties && (l.feature.properties.Município || l.feature.properties.NM_MUN) ? (l.feature.properties.Município || l.feature.properties.NM_MUN) : '-';
+                    doc.text('- ' + nome, 20, y);
+                    y += 5;
+                    if (y > 270) { doc.addPage(); y = 12; }
+                });
+                y += 2;
+            }
+        } else if (camada === 'Municípios com ETT' && ettLayer) {
+            // Legenda
+            doc.text('Legenda:', 16, y);
+            y += 6;
+            doc.setFillColor('#FF69B4');
+            doc.rect(20, y - 4, 5, 5, 'F');
+            doc.text('ETT', 27, y);
+            doc.text(`( ${window.ettCount || 0} )`, 27 + doc.getTextWidth('ETT') + 2, y);
+            y += 6;
+            y += 2;
+            // Lista de municípios
+            if (ettLayer.getLayers) {
+                doc.setFontSize(11);
+                doc.text('Municípios:', 16, y);
+                y += 6;
+                ettLayer.getLayers().forEach(l => {
+                    const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
+                    doc.text('- ' + nome, 20, y);
+                    y += 5;
+                    if (y > 270) { doc.addPage(); y = 12; }
+                });
+                y += 2;
+            }
+        } else if (camada === 'Municípios com PRADS' && pradsLayer) {
+            // Legenda
+            doc.text('Legenda:', 16, y);
+            y += 6;
+            doc.setFillColor('#FFFACD');
+            doc.rect(20, y - 4, 5, 5, 'F');
+            doc.text('PRADS', 27, y);
+            doc.text(`( ${window.pradsCount || 0} )`, 27 + doc.getTextWidth('PRADS') + 2, y);
+            y += 6;
+            y += 2;
+            // Lista de municípios
+            if (pradsLayer.getLayers) {
+                doc.setFontSize(11);
+                doc.text('Municípios:', 16, y);
+                y += 6;
+                pradsLayer.getLayers().forEach(l => {
+                    const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
+                    doc.text('- ' + nome, 20, y);
+                    y += 5;
+                    if (y > 270) { doc.addPage(); y = 12; }
+                });
+                y += 2;
+            }
+        } else if (camada === 'Municípios com Aterro Sanitário' && aterroLayer) {
+            // Legenda
+            doc.text('Legenda:', 16, y);
+            y += 6;
+            doc.setFillColor('#8B008B');
+            doc.rect(20, y - 4, 5, 5, 'F');
+            doc.text('Aterro', 27, y);
+            doc.text(`( ${window.aterroCount || 0} )`, 27 + doc.getTextWidth('Aterro') + 2, y);
+            y += 6;
+            y += 2;
+            // Lista de municípios
+            if (aterroLayer.getLayers) {
+                doc.setFontSize(11);
+                doc.text('Municípios:', 16, y);
+                y += 6;
+                aterroLayer.getLayers().forEach(l => {
+                    const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
+                    doc.text('- ' + nome, 20, y);
+                    y += 5;
+                    if (y > 270) { doc.addPage(); y = 12; }
+                });
+                y += 2;
+            }
+        } else if (camada === 'Destinação dos Resíduos Sólidos' && window.destinacaoLayerFull) {
+            // Legenda
+            doc.text('Legenda:', 16, y);
+            y += 6;
+            if (window.destCategorias && window.destCores) {
+                window.destCategorias.forEach(cat => {
+                    const color = window.destCores[cat] || '#bdbdbd';
+                    const count = window.destCount && window.destCount[cat] ? window.destCount[cat] : 0;
+                    doc.setFillColor(color);
+                    doc.rect(20, y - 4, 5, 5, 'F');
+                    doc.text(cat, 27, y);
+                    doc.text(`( ${count} )`, 27 + doc.getTextWidth(cat) + 2, y);
+                    y += 6;
+                });
+                y += 2;
+            }
+            // Lista de municípios filtrados pelo dropdown
+            const filtro = document.getElementById('filtro-destinacao');
+            let features = [];
+            if (filtro && filtro.value && filtro.value !== 'todos' && window.destData) {
+                features = window.destData.features.filter(f => f.properties && f.properties.DESTINACAO === filtro.value);
+            } else if (window.destData) {
+                features = window.destData.features;
+            }
+            if (features.length > 0) {
+                doc.setFontSize(11);
+                doc.text('Municípios:', 16, y);
+                y += 6;
+                features.forEach(f => {
+                    const nome = f.properties && f.properties.NM_MUN ? f.properties.NM_MUN : '-';
+                    doc.text('- ' + nome, 20, y);
+                    y += 5;
+                    if (y > 270) { doc.addPage(); y = 12; }
+                });
+                y += 2;
+            }
+        }
+        // Adicione outros casos para as demais camadas se desejar
     }
     // Captura do mapa
     doc.setFontSize(13);
