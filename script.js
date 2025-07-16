@@ -681,7 +681,7 @@ function getCamadasAtivas() {
     if (document.getElementById('toggle-ett').checked) camadas.push('Municípios com ETT');
     if (document.getElementById('toggle-prads').checked) camadas.push('Municípios com PRADS');
     if (document.getElementById('toggle-ugirsu').checked) camadas.push('Municípios com UGIRSU');
-    if (document.getElementById('toggle-cooperativas').checked) camadas.push('Iniciativas de Coleta Seletiva');
+    if (document.getElementById('toggle-cooperativas').checked) camadas.push('Municípios com Iniciativa de Coleta Seletiva');
     return camadas;
 }
 
@@ -788,14 +788,14 @@ function gerarRelatorioPDF() {
                 });
                 y += 2;
             }
-        } else if (camada === 'Iniciativas de Coleta Seletiva' && cooperativasLayer) {
+        } else if (camada === 'Municípios com Iniciativa de Coleta Seletiva' && cooperativasLayer) {
             // Legenda
             doc.text('Legenda:', 16, y);
             y += 6;
             doc.setFillColor('#FFFF00');
             doc.rect(20, y - 4, 5, 5, 'F');
-            doc.text('Iniciativas', 27, y);
-            doc.text(`( ${window.cooperativasCount || 0} )`, 27 + doc.getTextWidth('Iniciativas') + 2, y);
+            doc.text('Municípios com Iniciativa', 27, y);
+            doc.text(`( ${window.cooperativasCount || 0} )`, 27 + doc.getTextWidth('Municípios com Iniciativa') + 2, y);
             y += 6;
             y += 2;
             // Lista de municípios
