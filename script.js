@@ -73,9 +73,11 @@ function loadPBGeoJSON() {
                 '#b15928'  // marrom escuro
             ];
             const valorSet = new Set();
+            const countPorRegional = {};
             data.features.forEach(f => {
                 if (f.properties && f.properties.REGIONAL) {
                     valorSet.add(f.properties.REGIONAL);
+                    countPorRegional[f.properties.REGIONAL] = (countPorRegional[f.properties.REGIONAL] || 0) + 1;
                 }
             });
             const valoresUnicos = Array.from(valorSet);
@@ -110,6 +112,7 @@ function loadPBGeoJSON() {
             }).addTo(map);
             window.pbRegionais = valoresUnicos;
             window.pbRegionaisCores = corPorValor;
+            window.pbRegionaisCount = countPorRegional;
         })
         .catch(err => {
             console.error('Erro ao carregar pb.geojson:', err);
@@ -121,6 +124,7 @@ function loadAterroGeoJSON() {
     fetch('dados/municipios-aterro.geojson')
         .then(response => response.json())
         .then(data => {
+            let count = 0;
             aterroLayer = L.geoJSON(data, {
                 style: {
                     color: '#4F4F4F',
@@ -129,6 +133,7 @@ function loadAterroGeoJSON() {
                     fillOpacity: 0.85
                 },
                 onEachFeature: function(feature, layer) {
+                    count++;
                     let popup = '';
                     if (feature.properties) {
                         if (feature.properties.NM_MUN) {
@@ -141,6 +146,7 @@ function loadAterroGeoJSON() {
                     layer.bindPopup(popup);
                 }
             });
+            window.aterroCount = count;
         })
         .catch(err => {
             console.error('Erro ao carregar municipios-aterro.geojson:', err);
@@ -166,9 +172,11 @@ function loadDestinacaoGeoJSON() {
                 '#b15928'  // marrom escuro
             ];
             const valorSet = new Set();
+            const countPorDestinacao = {};
             data.features.forEach(f => {
                 if (f.properties && f.properties.DESTINACAO) {
                     valorSet.add(f.properties.DESTINACAO);
+                    countPorDestinacao[f.properties.DESTINACAO] = (countPorDestinacao[f.properties.DESTINACAO] || 0) + 1;
                 }
             });
             const valoresUnicos = Array.from(valorSet);
@@ -181,12 +189,23 @@ function loadDestinacaoGeoJSON() {
             destinacaoLayer = L.geoJSON(data, {
                 style: function(feature) {
                     const valor = feature.properties && feature.properties.DESTINACAO;
-                    return {
+                    let style = {
                         color: '#4F4F4F',
                         weight: 1,
                         fillColor: corPorValor[valor] || '#bdbdbd',
                         fillOpacity: 0.85
                     };
+                    // Estilos específicos para as categorias especiais
+                    if (valor === 'A S de Guarabira') {
+                        style.color = '#FF4500';
+                        style.weight = 2;
+                        style.fillOpacity = 0.9;
+                    } else if (valor === 'A S Coremas') {
+                        style.color = '#8A2BE2';
+                        style.weight = 2;
+                        style.fillOpacity = 0.9;
+                    }
+                    return style;
                 },
                 onEachFeature: function(feature, layer) {
                     let popup = '';
@@ -203,6 +222,7 @@ function loadDestinacaoGeoJSON() {
             }); // Não adiciona ao mapa aqui
             window.destCategorias = valoresUnicos;
             window.destCores = corPorValor;
+            window.destCount = countPorDestinacao;
         })
         .catch(err => {
             console.error('Erro ao carregar municipios-destinacao.geojson:', err);
@@ -214,6 +234,7 @@ function loadETTGeoJSON() {
     fetch('dados/municipios-ett.geojson')
         .then(response => response.json())
         .then(data => {
+            let count = 0;
             ettLayer = L.geoJSON(data, {
                 style: {
                     color: '#FF1493',
@@ -222,6 +243,7 @@ function loadETTGeoJSON() {
                     fillOpacity: 0.85
                 },
                 onEachFeature: function(feature, layer) {
+                    count++;
                     let popup = '';
                     if (feature.properties) {
                         if (feature.properties.NM_MUN) {
@@ -233,7 +255,8 @@ function loadETTGeoJSON() {
                     }
                     layer.bindPopup(popup);
                 }
-            }); // Não adiciona ao mapa aqui
+            });
+            window.ettCount = count;
         })
         .catch(err => {
             console.error('Erro ao carregar municipios-ett.geojson:', err);
@@ -245,6 +268,7 @@ function loadPRADSGeoJSON() {
     fetch('dados/municipios-prads.geojson')
         .then(response => response.json())
         .then(data => {
+            let count = 0;
             pradsLayer = L.geoJSON(data, {
                 style: {
                     color: '#FFD700',
@@ -253,6 +277,7 @@ function loadPRADSGeoJSON() {
                     fillOpacity: 0.85
                 },
                 onEachFeature: function(feature, layer) {
+                    count++;
                     let popup = '';
                     if (feature.properties) {
                         if (feature.properties.NM_MUN) {
@@ -264,7 +289,8 @@ function loadPRADSGeoJSON() {
                     }
                     layer.bindPopup(popup);
                 }
-            }); // Não adiciona ao mapa aqui
+            });
+            window.pradsCount = count;
         })
         .catch(err => {
             console.error('Erro ao carregar municipios-prads.geojson:', err);
@@ -276,6 +302,7 @@ function loadUGIRSUGeoJSON() {
     fetch('dados/municipios-ugirsu.geojson')
         .then(response => response.json())
         .then(data => {
+            let count = 0;
             ugirsuLayer = L.geoJSON(data, {
                 style: {
                     color: '#00CED1',
@@ -284,6 +311,7 @@ function loadUGIRSUGeoJSON() {
                     fillOpacity: 0.85
                 },
                 onEachFeature: function(feature, layer) {
+                    count++;
                     let popup = '';
                     if (feature.properties) {
                         if (feature.properties.NM_MUN) {
@@ -295,7 +323,8 @@ function loadUGIRSUGeoJSON() {
                     }
                     layer.bindPopup(popup);
                 }
-            }); // Não adiciona ao mapa aqui
+            });
+            window.ugirsuCount = count;
         })
         .catch(err => {
             console.error('Erro ao carregar municipios-ugirsu.geojson:', err);
@@ -307,8 +336,10 @@ function loadCooperativasGeoJSON() {
     fetch('dados/cooperativas.geojson')
         .then(response => response.json())
         .then(data => {
+            let count = 0;
             cooperativasLayer = L.geoJSON(data, {
                 pointToLayer: function(feature, latlng) {
+                    count++;
                     return L.circleMarker(latlng, {
                         radius: 3,
                         fillColor: '#FFFF00',
@@ -328,6 +359,7 @@ function loadCooperativasGeoJSON() {
                     layer.bindPopup(popup);
                 }
             });
+            window.cooperativasCount = count;
         })
         .catch(err => {
             console.error('Erro ao carregar cooperativas.geojson:', err);
@@ -369,31 +401,38 @@ function showLegend(type) {
         // Usar as mesmas cores e categorias da camada Paraíba
         if (window.pbRegionais && window.pbRegionais.length) {
             for (const reg of window.pbRegionais) {
-                html += `<div class='legend-item'><span class='legend-color' style='background:${window.pbRegionaisCores[reg]};'></span>${reg}</div>`;
+                const count = window.pbRegionaisCount && window.pbRegionaisCount[reg] ? window.pbRegionaisCount[reg] : 0;
+                html += `<div class='legend-item'><span class='legend-color' style='background:${window.pbRegionaisCores[reg]};'></span>${reg} <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
             }
         }
     } else if (type === 'destinacao') {
         html += '<div class="legend-subtitle">Destinação dos Resíduos</div>';
         if (window.destCategorias && window.destCategorias.length) {
             for (const cat of window.destCategorias) {
-                html += `<div class='legend-item'><span class='legend-color' style='background:${window.destCores[cat]};'></span>${cat}</div>`;
+                const count = window.destCount && window.destCount[cat] ? window.destCount[cat] : 0;
+                html += `<div class='legend-item'><span class='legend-color' style='background:${window.destCores[cat]};'></span>${cat} <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
             }
         }
     } else if (type === 'aterro') {
         html += '<div class="legend-subtitle">Municípios com Aterro Sanitário</div>';
-        html += `<div class='legend-item'><span class='legend-color' style='background:#8B008B;'></span>Aterro</div>`;
+        const count = window.aterroCount || 0;
+        html += `<div class='legend-item'><span class='legend-color' style='background:#8B008B;'></span>Aterro <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
     } else if (type === 'ett') {
         html += '<div class="legend-subtitle">Municípios com ETT</div>';
-        html += `<div class='legend-item'><span class='legend-color' style='background:#FF69B4;'></span>ETT</div>`;
+        const count = window.ettCount || 0;
+        html += `<div class='legend-item'><span class='legend-color' style='background:#FF69B4;'></span>ETT <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
     } else if (type === 'prads') {
         html += '<div class="legend-subtitle">Municípios com PRADS</div>';
-        html += `<div class='legend-item'><span class='legend-color' style='background:#FFFACD;'></span>PRADS</div>`;
+        const count = window.pradsCount || 0;
+        html += `<div class='legend-item'><span class='legend-color' style='background:#FFFACD;'></span>PRADS <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
     } else if (type === 'ugirsu') {
         html += '<div class="legend-subtitle">Municípios com UGIRSU</div>';
-        html += `<div class='legend-item'><span class='legend-color' style='background:#AFEEEE;'></span>UGIRSU</div>`;
+        const count = window.ugirsuCount || 0;
+        html += `<div class='legend-item'><span class='legend-color' style='background:#AFEEEE;'></span>UGIRSU <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
     } else if (type === 'cooperativas') {
-        html += '<div class="legend-subtitle">Cooperativas de Catadores</div>';
-        html += `<div class='legend-item'><span class='legend-color' style='background:#FFFF00;'></span>Cooperativa</div>`;
+        html += '<div class="legend-subtitle">Iniciativas de Coleta Seletiva</div>';
+        const count = window.cooperativasCount || 0;
+        html += `<div class='legend-item'><span class='legend-color' style='background:#FFFF00;'></span>Iniciativas <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
     }
     legend.innerHTML = html;
     legend.style.display = 'block';
@@ -500,68 +539,9 @@ function setupLayerToggles() {
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
     
-    // Adicionar funcionalidades responsivas
-    setupResponsiveFeatures();
-    
     console.log('WebGIS inicializado com 3 camadas de basemaps e camada pb.geojson!');
     console.log('Basemaps disponíveis:');
     console.log('- OpenStreetMap (padrão)');
     console.log('- Imagem de Satélite (Esri)');
     console.log('- Mapa Topográfico (OpenTopoMap)');
-});
-
-// Função para configurar funcionalidades responsivas
-function setupResponsiveFeatures() {
-    // Fechar sidebar ao redimensionar para desktop
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            document.getElementById('sidebar').classList.remove('active');
-        }
-    });
-    
-    // Melhorar experiência de touch em mobile
-    if ('ontouchstart' in window) {
-        // Aumentar área de toque para elementos interativos
-        const touchElements = document.querySelectorAll('.layer-fab, .home-btn, .sidebar-toggle, .basemap-btn');
-        touchElements.forEach(element => {
-            element.style.minHeight = '44px';
-            element.style.minWidth = '44px';
-        });
-        
-        // Adicionar feedback visual para toque
-        touchElements.forEach(element => {
-            element.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.95)';
-            });
-            
-            element.addEventListener('touchend', function() {
-                this.style.transform = 'scale(1)';
-            });
-        });
-    }
-    
-    // Melhorar acessibilidade
-    document.addEventListener('keydown', function(e) {
-        // ESC para fechar sidebar em mobile
-        if (e.key === 'Escape' && window.innerWidth <= 768) {
-            document.getElementById('sidebar').classList.remove('active');
-        }
-        
-        // Enter para buscar no campo de geolocalização
-        if (e.key === 'Enter' && document.activeElement.id === 'geolocate-input') {
-            document.getElementById('geolocate-btn').click();
-        }
-    });
-    
-    // Melhorar performance em dispositivos móveis
-    if (window.innerWidth <= 768) {
-        // Reduzir animações em mobile para melhor performance
-        document.body.style.setProperty('--transition-duration', '0.2s');
-        
-        // Otimizar para touch
-        const map = document.getElementById('map');
-        if (map) {
-            map.style.touchAction = 'manipulation';
-        }
-    }
-} 
+}); 
