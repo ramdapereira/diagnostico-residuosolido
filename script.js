@@ -1,6 +1,6 @@
 // Inicialização do mapa
 let map;
-let currentBasemap = 'satellite';
+let currentBasemap = 'osm';
 let pbLayer = null;
 let aterroLayer = null;
 let destinacaoLayer = null;
@@ -31,7 +31,7 @@ function initMap() {
     map = L.map('map', {
         center: [-7.2399, -36.7819], // Centro aproximado da Paraíba
         zoom: 8,
-        layers: [basemaps.satellite]
+        layers: [basemaps.osm]
     });
 
     // Adicionar controle de escala
@@ -51,7 +51,7 @@ function initMap() {
     setupLayerToggles();
 
     // Ativar o botão correto ao carregar
-    setActiveBasemapBtn('satellite');
+    setActiveBasemapBtn('osm');
 }
 
 // Função para carregar pb.geojson
@@ -59,60 +59,25 @@ function loadPBGeoJSON() {
     fetch('dados/pb.geojson')
         .then(response => response.json())
         .then(data => {
-            // 1. Identificar valores únicos da coluna REGIONAL
-            const cores = [
-                '#1b9e77', // verde
-                '#d95f02', // laranja
-                '#7570b3', // roxo
-                '#e7298a', // magenta
-                '#66a61e', // verde oliva
-                '#e6ab02', // amarelo mostarda
-                '#a6761d', // marrom claro
-                '#666666', // cinza
-                '#1f78b4', // azul
-                '#b15928'  // marrom escuro
-            ];
-            const valorSet = new Set();
-            const countPorRegional = {};
-            data.features.forEach(f => {
-                if (f.properties && f.properties.REGIONAL) {
-                    valorSet.add(f.properties.REGIONAL);
-                    countPorRegional[f.properties.REGIONAL] = (countPorRegional[f.properties.REGIONAL] || 0) + 1;
-                }
-            });
-            const valoresUnicos = Array.from(valorSet);
-            // 2. Mapear valor => cor
-            const corPorValor = {};
-            valoresUnicos.forEach((valor, idx) => {
-                corPorValor[valor] = cores[idx % cores.length];
-            });
-            // 3. Criar camada com estilo categórico
             pbLayer = L.geoJSON(data, {
                 style: function(feature) {
-                    const valor = feature.properties && feature.properties.REGIONAL;
                     return {
-                        color: '#4F4F4F',
-                        weight: 1,
-                        fillColor: corPorValor[valor] || '#bdbdbd',
-                        fillOpacity: 0.85
+                        color: '#2F4F4F',
+                        weight: 2,
+                        fillColor: '#ffffff',
+                        fillOpacity: 0.0
                     };
                 },
                 onEachFeature: function(feature, layer) {
                     let popup = '';
                     if (feature.properties) {
                         if (feature.properties.NM_MUN) {
-                            popup += `<strong>NM_MUN:</strong> ${feature.properties.NM_MUN}<br/>`;
-                        }
-                        if (feature.properties.REGIONAL) {
-                            popup += `<strong>REGIONAL:</strong> ${feature.properties.REGIONAL}`;
+                            popup += `<strong>NM_MUN:</strong> ${feature.properties.NM_MUN}`;
                         }
                     }
                     layer.bindPopup(popup);
                 }
             }).addTo(map);
-            window.pbRegionais = valoresUnicos;
-            window.pbRegionaisCores = corPorValor;
-            window.pbRegionaisCount = countPorRegional;
         })
         .catch(err => {
             console.error('Erro ao carregar pb.geojson:', err);
@@ -226,15 +191,15 @@ function loadDestinacaoGeoJSON() {
             window.destData = data;
 
             // Popular o filtro de categorias
-            const filtro = document.getElementById('filtro-destinacao');
-            if (filtro) {
+            const filtroContainer = document.getElementById('filtro-destinacao-checkboxes');
+            if (filtroContainer) {
                 // Limpa opções antigas (exceto 'Todos')
-                filtro.innerHTML = '<option value="todos">Todos</option>';
+                filtroContainer.innerHTML = '<label style="display:block;font-size:12px;margin:2px 0;cursor:pointer;"><input type="checkbox" value="todos" checked style="margin-right:4px;">Todos</label>';
                 valoresUnicos.forEach(cat => {
-                    const opt = document.createElement('option');
-                    opt.value = cat;
-                    opt.textContent = cat;
-                    filtro.appendChild(opt);
+                    const label = document.createElement('label');
+                    label.style.cssText = 'display:block;font-size:12px;margin:2px 0;cursor:pointer;';
+                    label.innerHTML = `<input type="checkbox" value="${cat}" style="margin-right:4px;">${cat}`;
+                    filtroContainer.appendChild(label);
                 });
             }
 
@@ -310,6 +275,8 @@ function loadDestinacaoGeoJSON() {
                     }
                 });
             });
+            // Configurar o filtro após as camadas serem carregadas
+            setupFiltroDestinacao();
         })
         .catch(err => {
             console.error('Erro ao carregar municipios-destinacao.geojson:', err);
@@ -424,14 +391,15 @@ function loadCooperativasGeoJSON() {
         .then(response => response.json())
         .then(data => {
             let count = 0;
+            
             cooperativasLayer = L.geoJSON(data, {
                 pointToLayer: function(feature, latlng) {
                     count++;
                     return L.circleMarker(latlng, {
-                        radius: 3,
-                        fillColor: '#FFFF00',
-                        color: '#E6E600',
-                        weight: 1.5,
+                        radius: 4,
+                        fillColor: '#228B22',
+                        color: '#006400',
+                        weight: 1,
                         opacity: 1,
                         fillOpacity: 0.8
                     });
@@ -484,14 +452,8 @@ function showLegend(type) {
     const legend = document.getElementById('legend-container');
     let html = '<div class="legend-title">Legenda</div>';
     if (type === 'pb') {
-        html += '<div class="legend-subtitle">Regional</div>';
-        // Usar as mesmas cores e categorias da camada Paraíba
-        if (window.pbRegionais && window.pbRegionais.length) {
-            for (const reg of window.pbRegionais) {
-                const count = window.pbRegionaisCount && window.pbRegionaisCount[reg] ? window.pbRegionaisCount[reg] : 0;
-                html += `<div class='legend-item'><span class='legend-color' style='background:${window.pbRegionaisCores[reg]};'></span><span class='legend-label'>${reg}</span><span class='legend-count'>( ${count} )</span></div>`;
-            }
-        }
+        html += '<div class="legend-subtitle">Limites Municipais PB</div>';
+        html += `<div class='legend-item'><span class='legend-color' style='background:transparent;border:2px solid #2F4F4F;'></span><span class='legend-label'>Limites Municipais PB</span></div>`;
     } else if (type === 'destinacao') {
         html += '<div class="legend-subtitle">Destinação dos Resíduos</div>';
         if (window.destCategorias && window.destCategorias.length) {
@@ -519,7 +481,7 @@ function showLegend(type) {
     } else if (type === 'cooperativas') {
         html += '<div class="legend-subtitle">Iniciativas de Coleta Seletiva</div>';
         const count = window.cooperativasCount || 0;
-        html += `<div class='legend-item'><span class='legend-color' style='background:#FFFF00;'></span>Iniciativas <span style='color:#888;font-size:13px;'>( ${count} )</span></div>`;
+        html += `<div class='legend-item'><span class='legend-color' style='background:#228B22;'></span><span class='legend-label'>Iniciativas</span><span class='legend-count'>( ${count} )</span></div>`;
     }
     legend.innerHTML = html;
     legend.style.display = 'block';
@@ -564,17 +526,19 @@ function setupLayerToggles() {
         }
     });
     destinacaoToggle.addEventListener('change', function() {
+        const filtroContainer = document.getElementById('filtro-destinacao-checkboxes');
         // Sempre remover todas as camadas ao ativar/desativar
         if (window.destinacaoLayerFull) map.removeLayer(window.destinacaoLayerFull);
         if (window.destinacaoLayersByCat) {
             Object.values(window.destinacaoLayersByCat).forEach(l => map.removeLayer(l));
         }
         if (destinacaoToggle.checked) {
-            filtro.disabled = false;
-            // Não adiciona nenhuma camada automaticamente
-            hideLegend();
+            if (filtroContainer) filtroContainer.disabled = false;
+            // Adiciona automaticamente a camada completa quando ativada
+            if (window.destinacaoLayerFull) map.addLayer(window.destinacaoLayerFull);
+            showLegend('destinacao');
         } else {
-            filtro.disabled = true;
+            if (filtroContainer) filtroContainer.disabled = true;
             hideLegend();
         }
     });
@@ -623,30 +587,59 @@ function setupLayerToggles() {
         }
     });
     // Exibir legenda da Paraíba ao iniciar
-    if (pbToggle.checked) showLegend('pb');
+    // if (pbToggle.checked) showLegend('pb');
 }
 
 // Atualizar exibição da camada de destinação conforme filtro
 function setupFiltroDestinacao() {
-    const filtro = document.getElementById('filtro-destinacao');
+    const filtroContainer = document.getElementById('filtro-destinacao-checkboxes');
     const destinacaoToggle = document.getElementById('toggle-destinacao');
-    if (!filtro || !destinacaoToggle) return;
-    filtro.addEventListener('change', function() {
-        if (!destinacaoToggle.checked) return;
-        // Remove todas as camadas SEMPRE antes de adicionar a correta
-        if (window.destinacaoLayerFull) map.removeLayer(window.destinacaoLayerFull);
-        if (window.destinacaoLayersByCat) {
-            Object.values(window.destinacaoLayersByCat).forEach(l => map.removeLayer(l));
-        }
-        // Adiciona apenas a camada selecionada
-        if (filtro.value === 'todos') {
-            if (window.destinacaoLayerFull) map.addLayer(window.destinacaoLayerFull);
+    if (!filtroContainer || !destinacaoToggle) return;
+
+    // Adiciona event listeners para cada checkbox
+    filtroContainer.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (!destinacaoToggle.checked) return;
+
+            // Remove todas as camadas SEMPRE antes de adicionar a correta
+            if (window.destinacaoLayerFull) map.removeLayer(window.destinacaoLayerFull);
+            if (window.destinacaoLayersByCat) {
+                Object.values(window.destinacaoLayersByCat).forEach(l => map.removeLayer(l));
+            }
+
+            const todosCheckbox = filtroContainer.querySelector('input[value="todos"]');
+            const checkedBoxes = filtroContainer.querySelectorAll('input[type="checkbox"]:checked');
+            const checkedValues = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if (this.value === 'todos') {
+                // Se clicou em 'Todos', desmarca todas as outras
+                filtroContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    if (cb.value !== 'todos') cb.checked = false;
+                });
+                if (window.destinacaoLayerFull) map.addLayer(window.destinacaoLayerFull);
+            } else {
+                // Se clicou em qualquer categoria, desmarca 'Todos'
+                if (todosCheckbox) todosCheckbox.checked = false;
+                // Atualiza lista de selecionados
+                const checkedBoxesAtual = filtroContainer.querySelectorAll('input[type="checkbox"]:checked');
+                const checkedValuesAtual = Array.from(checkedBoxesAtual).map(cb => cb.value);
+                if (checkedValuesAtual.length === 0) {
+                    // Se nada está selecionado, marca 'Todos' automaticamente
+                    if (todosCheckbox) todosCheckbox.checked = true;
+                    if (window.destinacaoLayerFull) map.addLayer(window.destinacaoLayerFull);
+                } else {
+                    // Adiciona cada camada selecionada
+                    checkedValuesAtual.forEach(value => {
+                        if (window.destinacaoLayersByCat && window.destinacaoLayersByCat[value]) {
+                            map.addLayer(window.destinacaoLayersByCat[value]);
+                        }
+                    });
+                }
+            }
             showLegend('destinacao');
-        } else if (filtro.value && window.destinacaoLayersByCat && window.destinacaoLayersByCat[filtro.value]) {
-            map.addLayer(window.destinacaoLayersByCat[filtro.value]);
-            showLegend('destinacao');
-        }
+        });
     });
+
     destinacaoToggle.addEventListener('change', function() {
         // Sempre remover todas as camadas ao ativar/desativar
         if (window.destinacaoLayerFull) map.removeLayer(window.destinacaoLayerFull);
@@ -654,21 +647,27 @@ function setupFiltroDestinacao() {
             Object.values(window.destinacaoLayersByCat).forEach(l => map.removeLayer(l));
         }
         if (destinacaoToggle.checked) {
-            filtro.disabled = false;
-            // Não adiciona nenhuma camada automaticamente
-            hideLegend();
+            if (filtroContainer) filtroContainer.disabled = false;
+            // Adiciona automaticamente a camada completa quando ativada
+            if (window.destinacaoLayerFull) map.addLayer(window.destinacaoLayerFull);
+            showLegend('destinacao');
         } else {
-            filtro.disabled = true;
+            if (filtroContainer) filtroContainer.disabled = true;
             hideLegend();
         }
     });
     // Inicialmente, se a camada estiver ativa, mostrar tudo
     if (destinacaoToggle.checked) {
-        filtro.disabled = false;
-        filtro.value = 'todos';
-        filtro.dispatchEvent(new Event('change'));
+        if (filtroContainer) filtroContainer.disabled = false;
+        // Marca o checkbox "Todos" e desmarca os outros
+        filtroContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = (cb.value === 'todos');
+        });
+        // Adiciona automaticamente a camada completa
+        if (window.destinacaoLayerFull) map.addLayer(window.destinacaoLayerFull);
+        showLegend('destinacao');
     } else {
-        filtro.disabled = true;
+        if (filtroContainer) filtroContainer.disabled = true;
     }
 }
 
@@ -687,9 +686,18 @@ function getCamadasAtivas() {
 
 // Função utilitária para obter filtro de destinação
 function getFiltroDestinacao() {
-    const filtro = document.getElementById('filtro-destinacao');
-    if (filtro && filtro.value && filtro.value !== 'todos') return filtro.value;
-    return 'Todos';
+    const filtroContainer = document.getElementById('filtro-destinacao-checkboxes');
+    if (!filtroContainer) return 'Todos';
+    const checkedBoxes = filtroContainer.querySelectorAll('input[type="checkbox"]:checked');
+    const checkedValues = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (checkedValues.includes('todos')) {
+        return 'Todos';
+    } else if (checkedValues.length === 0) {
+        return 'Todos';
+    } else {
+        return checkedValues.join(', ');
+    }
 }
 
 // Função utilitária para obter legenda visível
@@ -700,10 +708,16 @@ function getLegendaHTML() {
 
 // Função utilitária para obter lista de feições filtradas (destinação)
 function getFeicoesFiltradas() {
-    const filtro = document.getElementById('filtro-destinacao');
-    if (!filtro || !window.destData) return [];
-    if (filtro.value === 'todos') return [];
-    return window.destData.features.filter(f => f.properties && f.properties.DESTINACAO === filtro.value);
+    const filtroContainer = document.getElementById('filtro-destinacao-checkboxes');
+    if (!filtroContainer || !window.destData) return [];
+    const checkedBoxes = filtroContainer.querySelectorAll('input[type="checkbox"]:checked');
+    const checkedValues = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (checkedValues.includes('todos') || checkedValues.length === 0) return [];
+    
+    return window.destData.features.filter(f => 
+        f.properties && f.properties.DESTINACAO && checkedValues.includes(f.properties.DESTINACAO)
+    );
 }
 
 // Função para gerar o relatório em PDF
@@ -792,10 +806,10 @@ function gerarRelatorioPDF() {
             // Legenda
             doc.text('Legenda:', 16, y);
             y += 6;
-            doc.setFillColor('#FFFF00');
+            doc.setFillColor('#228B22');
             doc.rect(20, y - 4, 5, 5, 'F');
-            doc.text('Municípios com Iniciativa', 27, y);
-            doc.text(`( ${window.cooperativasCount || 0} )`, 27 + doc.getTextWidth('Municípios com Iniciativa') + 2, y);
+            doc.text('Iniciativas de Coleta Seletiva', 27, y);
+            doc.text(`( ${window.cooperativasCount || 0} )`, 27 + doc.getTextWidth('Iniciativas de Coleta Seletiva') + 2, y);
             y += 6;
             y += 2;
             // Lista de municípios
@@ -897,12 +911,16 @@ function gerarRelatorioPDF() {
                 y += 2;
             }
             // Lista de municípios filtrados pelo dropdown
-            const filtro = document.getElementById('filtro-destinacao');
+            const filtroContainer = document.getElementById('filtro-destinacao-checkboxes');
+            const checkedBoxes = filtroContainer.querySelectorAll('input[type="checkbox"]:checked');
+            const checkedValues = Array.from(checkedBoxes).map(cb => cb.value);
             let features = [];
-            if (filtro && filtro.value && filtro.value !== 'todos' && window.destData) {
-                features = window.destData.features.filter(f => f.properties && f.properties.DESTINACAO === filtro.value);
-            } else if (window.destData) {
+            if (checkedValues.length > 0 && checkedValues.includes('todos')) {
                 features = window.destData.features;
+            } else if (checkedValues.length > 0) {
+                features = window.destData.features.filter(f => 
+                    f.properties && f.properties.DESTINACAO && checkedValues.includes(f.properties.DESTINACAO)
+                );
             }
             if (features.length > 0) {
                 doc.setFontSize(11);
@@ -949,5 +967,4 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('- OpenStreetMap (padrão)');
     console.log('- Imagem de Satélite (Esri)');
     console.log('- Mapa Topográfico (OpenTopoMap)');
-    setupFiltroDestinacao();
 }); 
