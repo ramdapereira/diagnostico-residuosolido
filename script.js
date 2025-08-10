@@ -407,8 +407,8 @@ function loadCooperativasGeoJSON() {
                 onEachFeature: function(feature, layer) {
                     let popup = '';
                     if (feature.properties) {
-                        if (feature.properties.Município) {
-                            popup += `<strong>Município:</strong> ${feature.properties.Município}`;
+                        if (feature.properties.NM_MUN) {
+                            popup += `<strong>NM_MUN:</strong> ${feature.properties.NM_MUN}`;
                         }
                     }
                     layer.bindPopup(popup);
