@@ -718,8 +718,9 @@ function getFeicoesFiltradas() {
 // Função para gerar o relatório em PDF
 function gerarRelatorioPDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     let y = 12;
+    const pageHeight = 190; // Altura máxima para orientação paisagem
     // Título
     doc.setFontSize(18);
     doc.text('Relatório WebGIS - Diagnóstico dos Resíduos Sólidos na Paraíba', 12, y);
@@ -770,7 +771,7 @@ function gerarRelatorioPDF() {
                     const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
                     doc.text('- ' + nome, 20, y);
                     y += 5;
-                    if (y > 270) { doc.addPage(); y = 12; }
+                    if (y > pageHeight) { doc.addPage(); y = 12; }
                 });
                 y += 2;
             }
@@ -793,7 +794,7 @@ function gerarRelatorioPDF() {
                     const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
                     doc.text('- ' + nome, 20, y);
                     y += 5;
-                    if (y > 270) { doc.addPage(); y = 12; }
+                    if (y > pageHeight) { doc.addPage(); y = 12; }
                 });
                 y += 2;
             }
@@ -816,7 +817,7 @@ function gerarRelatorioPDF() {
                     const nome = l.feature && l.feature.properties && (l.feature.properties.Município || l.feature.properties.NM_MUN) ? (l.feature.properties.Município || l.feature.properties.NM_MUN) : '-';
                     doc.text('- ' + nome, 20, y);
                     y += 5;
-                    if (y > 270) { doc.addPage(); y = 12; }
+                    if (y > pageHeight) { doc.addPage(); y = 12; }
                 });
                 y += 2;
             }
@@ -839,7 +840,7 @@ function gerarRelatorioPDF() {
                     const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
                     doc.text('- ' + nome, 20, y);
                     y += 5;
-                    if (y > 270) { doc.addPage(); y = 12; }
+                    if (y > pageHeight) { doc.addPage(); y = 12; }
                 });
                 y += 2;
             }
@@ -862,7 +863,7 @@ function gerarRelatorioPDF() {
                     const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
                     doc.text('- ' + nome, 20, y);
                     y += 5;
-                    if (y > 270) { doc.addPage(); y = 12; }
+                    if (y > pageHeight) { doc.addPage(); y = 12; }
                 });
                 y += 2;
             }
@@ -885,7 +886,7 @@ function gerarRelatorioPDF() {
                     const nome = l.feature && l.feature.properties && l.feature.properties.NM_MUN ? l.feature.properties.NM_MUN : '-';
                     doc.text('- ' + nome, 20, y);
                     y += 5;
-                    if (y > 270) { doc.addPage(); y = 12; }
+                    if (y > pageHeight) { doc.addPage(); y = 12; }
                 });
                 y += 2;
             }
@@ -925,7 +926,7 @@ function gerarRelatorioPDF() {
                     const nome = f.properties && f.properties.NM_MUN ? f.properties.NM_MUN : '-';
                     doc.text('- ' + nome, 20, y);
                     y += 5;
-                    if (y > 270) { doc.addPage(); y = 12; }
+                    if (y > pageHeight) { doc.addPage(); y = 12; }
                 });
                 y += 2;
             }
