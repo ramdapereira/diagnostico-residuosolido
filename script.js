@@ -392,18 +392,14 @@ function loadCooperativasGeoJSON() {
             let count = 0;
             
             cooperativasLayer = L.geoJSON(data, {
-                pointToLayer: function(feature, latlng) {
-                    count++;
-                    return L.circleMarker(latlng, {
-                        radius: 4,
-                        fillColor: '#228B22',
-                        color: '#006400',
-                        weight: 1,
-                        opacity: 1,
-                        fillOpacity: 0.8
-                    });
+                style: {
+                    color: '#006400',
+                    weight: 1,
+                    fillColor: '#228B22',
+                    fillOpacity: 0.8
                 },
                 onEachFeature: function(feature, layer) {
+                    count++;
                     let popup = '';
                     if (feature.properties) {
                         if (feature.properties.NM_MUN) {
