@@ -941,9 +941,10 @@ function gerarRelatorioPDF() {
         const pageWidth = doc.internal.pageSize.getWidth() - 24;
         const imgProps = doc.getImageProperties(imgData);
         const imgHeight = (imgProps.height * pageWidth) / imgProps.width;
-        // Centralizar a imagem
-        const x = 12 + (pageWidth - (imgProps.width * (pageWidth / imgProps.width))) / 2;
-        doc.addImage(imgData, 'PNG', x, y, pageWidth, imgHeight > 120 ? 120 : imgHeight);
+        // Centralizar a imagem horizontalmente
+        const x = 12; // Margem esquerda
+        const finalImgHeight = imgHeight > 120 ? 120 : imgHeight;
+        doc.addImage(imgData, 'PNG', x, y, pageWidth, finalImgHeight);
         doc.save('relatorio-webgis.pdf');
     });
 }
