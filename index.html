@@ -37,7 +37,7 @@
         .layer-fab {
             position: absolute;
             top: 18px;
-            left: 18px;
+            right: 120px;
             width: 48px;
             height: 48px;
             background: #F5F5F5;
@@ -64,7 +64,7 @@
         .layer-card {
             position: absolute;
             top: 72px;
-            right: 12px;
+            right: 18px;
             background: #fff;
             border-radius: 6px;
             box-shadow: 0 1px 6px rgba(0,0,0,0.10);
@@ -146,7 +146,7 @@
         .geolocate-box.geolocate-top-right {
             position: absolute;
             top: 18px;
-            right: 74px;
+            right: 18px;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.10);
@@ -156,7 +156,6 @@
             z-index: 1200;
             padding: 4px 8px;
             gap: 4px;
-            margin-left: 70px;
         }
         .geolocate-box input {
             border: 1px solid #ccc;
@@ -181,8 +180,8 @@
         }
         .legend-container {
             position: absolute;
-            bottom: 8px;
-            right: 8px;
+            bottom: 18px;
+            right: 18px;
             background: #fff;
             border-radius: 6px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.10);
@@ -401,6 +400,9 @@
             .sidebar {
                 width: 220px;
             }
+            #map {
+                left: 220px;
+            }
             
             .sidebar-title {
                 font-size: 1.2rem;
@@ -581,7 +583,10 @@
         /* Melhorias para desktop */
         @media (min-width: 1200px) {
             .sidebar {
-                width: 260px;
+                width: 240px;
+            }
+            #map {
+                left: 240px;
             }
             
             .sidebar-title {
@@ -623,11 +628,13 @@
 
         @media (min-width: 769px) {
             .sidebar {
-                width: 150px;
+                width: 200px;
+            }
+            #map {
+                left: 200px;
             }
             .layer-fab {
-                right: 18px;
-                left: unset;
+                right: 120px;
                 top: 18px;
             }
         }
