@@ -356,7 +356,7 @@ function loadUGIRSUGeoJSON() {
     fetch('dados/municipios-ugirsu.geojson')
         .then(response => response.json())
         .then(data => {
-            let count = 0;
+            let count = data.features.length;
             ugirsuLayer = L.geoJSON(data, {
                 style: {
                     color: '#00CED1',
@@ -365,7 +365,6 @@ function loadUGIRSUGeoJSON() {
                     fillOpacity: 0.85
                 },
                 onEachFeature: function(feature, layer) {
-                    count++;
                     let popup = '';
                     if (feature.properties) {
                         if (feature.properties.NM_MUN) {
