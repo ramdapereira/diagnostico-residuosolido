@@ -261,23 +261,24 @@
         }
         .sidebar-title {
             width: 100%;
-            background: rgba(255,255,255,0.96);
-            padding: 32px 12px 28px 12px;
-            font-size: 1.7rem;
-            font-weight: bold;
-            color: #228B22;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 28px 16px 24px 16px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a5f1a;
             text-align: center;
-            border-bottom: 2px solid #e0e0e0;
-            letter-spacing: 0.5px;
+            border-bottom: 3px solid #228B22;
+            letter-spacing: 0.3px;
             border-top-left-radius: 0;
             border-top-right-radius: 0;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            box-shadow: 0 4px 12px rgba(34, 139, 34, 0.1);
             white-space: normal;
             max-width: 100%;
             margin: 0 auto;
-            line-height: 1.3;
+            line-height: 1.4;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .home-btn {
             position: absolute;
@@ -310,34 +311,42 @@
             display: block;
         }
         .sidebar-desc {
-            margin: 18px 0 0 0;
-            font-size: 0.65rem;
-            color: #333;
+            margin: 20px 12px 0 12px;
+            font-size: 0.75rem;
+            color: #2c3e50;
             text-align: justify;
-            line-height: 1.5;
-            background: #f9f9fc;
-            border-radius: 8px;
-            padding: 14px 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-            width: 100%;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            width: calc(100% - 24px);
+            border: 1px solid #e9ecef;
+            font-weight: 400;
         }
         .sidebar-info {
-            margin: 16px 0 0 0;
-            font-size: 0.65rem;
-            color: #333;
-            background: #f9f9fc;
-            border-radius: 8px;
-            padding: 14px 16px 12px 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            margin: 20px 12px 0 12px;
+            font-size: 0.75rem;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            padding: 20px 22px 18px 22px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
             text-align: center;
-            width: 100%;
+            width: calc(100% - 24px);
+            border: 1px solid #e9ecef;
         }
         .sidebar-info-title {
-            font-weight: bold;
-            margin-bottom: 4px;
-            color: #228B22;
-            font-size: 1.5m;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1a5f1a;
+            font-size: 0.85rem;
             text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #228B22;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
         }
         .sidebar-info ul {
             margin: 0 0 0 0;
@@ -346,8 +355,18 @@
             text-align: center;
         }
         .sidebar-info li {
-            margin-bottom: 2px;
+            margin-bottom: 6px;
             text-align: center;
+            padding: 4px 8px;
+            background: rgba(34, 139, 34, 0.05);
+            border-radius: 6px;
+            font-weight: 500;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+        }
+        .sidebar-info li:hover {
+            background: rgba(34, 139, 34, 0.1);
+            transform: translateY(-1px);
         }
 
         /* Botão para mostrar/ocultar sidebar em mobile */
@@ -384,20 +403,20 @@
             }
             
             .sidebar-title {
-                font-size: 0.9rem;
-                padding: 14px 4px 10px 4px;
+                font-size: 1.2rem;
+                padding: 20px 12px 16px 12px;
             }
             
             .sidebar-desc {
-                font-size: 0.65rem;
-                margin: 16px 12px 0 12px;
-                padding: 8px 12px;
+                font-size: 0.7rem;
+                margin: 18px 10px 0 10px;
+                padding: 14px 16px;
             }
             
             .sidebar-info {
-                margin: 14px 12px 0 12px;
-                font-size: 0.65rem;
-                padding: 8px 12px 6px 12px;
+                margin: 18px 10px 0 10px;
+                font-size: 0.7rem;
+                padding: 16px 18px 14px 18px;
             }
         }
 
@@ -527,20 +546,20 @@
 
         @media (max-width: 360px) {
             .sidebar-title {
-                font-size: 0.85rem;
-                padding: 12px 4px 8px 4px;
+                font-size: 1rem;
+                padding: 16px 8px 12px 8px;
             }
             
             .sidebar-desc {
-                font-size: 0.6rem;
-                margin: 12px 8px 0 8px;
-                padding: 6px 10px;
+                font-size: 0.65rem;
+                margin: 16px 8px 0 8px;
+                padding: 12px 14px;
             }
             
             .sidebar-info {
-                margin: 12px 8px 0 8px;
-                font-size: 0.6rem;
-                padding: 6px 10px 4px 10px;
+                margin: 16px 8px 0 8px;
+                font-size: 0.65rem;
+                padding: 14px 16px 12px 16px;
             }
             
             .layer-fab, .home-btn, .sidebar-toggle {
@@ -566,20 +585,20 @@
             }
             
             .sidebar-title {
-                font-size: 1.1rem;
-                padding: 18px 8px 14px 8px;
+                font-size: 1.6rem;
+                padding: 32px 20px 28px 20px;
             }
             
             .sidebar-desc {
-                font-size: 0.75rem;
-                margin: 20px 18px 0 18px;
-                padding: 12px 16px;
+                font-size: 0.8rem;
+                margin: 24px 20px 0 20px;
+                padding: 22px 24px;
             }
             
             .sidebar-info {
-                margin: 18px 18px 0 18px;
-                font-size: 0.75rem;
-                padding: 12px 16px 10px 16px;
+                margin: 24px 20px 0 20px;
+                font-size: 0.8rem;
+                padding: 24px 26px 22px 26px;
             }
             
             .layer-card {
